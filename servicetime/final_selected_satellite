@@ -1,0 +1,62 @@
+from satellite_whether import Selected_Satellite
+import pandas as pd
+
+Max_Access_Time = 7000
+Max_Storage_Size = 500
+Min_Storage_Size = 150
+MAX_Remaining_Time = -99999
+Min_Remaining_Time = 99999
+Min_str = ""
+sum_probability = 0.0
+satellite_four_parameters = ""
+
+fp_last = open("final_selected_satellite.txt", "a")
+Selected_Satellite()
+fp1 = open("selected_satellite.txt")
+l1 = len(fp1.readlines())
+fp1.close()
+fp1 = open("selected_satellite.txt")
+
+a = []
+b = []
+for i in range(l1):
+    line2 = fp1.readline().rstrip()
+    line1 = line2.split("    ")[0].split(" ")
+    a.append(int(line1[2]))
+    b.append(int(line1[3]))
+    if int(float(line1[1])) < Min_Remaining_Time:
+        Min_Remaining_Time = int(float(line1[1]))
+        Min_str = line2
+    probability = (int(line1[2]) + int(line1[3])) / (Max_Access_Time + Max_Storage_Size - Min_Storage_Size)
+    sum_probability = sum_probability + probability
+fp1.close()
+
+a1 = pd.Series(a)
+b1 = pd.Series(b)
+average_probability = sum_probability / l1
+
+fp1 = open("selected_satellite.txt")
+Flag = 0
+
+for i in range(l1):
+    line2 = fp1.readline().rstrip()
+    line1 = line2.split("    ")[0].split(" ")
+    remaining_time = int(float(line1[1]))
+    probability = (int(line1[2]) + int(line1[3])) / (Max_Access_Time + Max_Storage_Size - Min_Storage_Size) * 1.0
+    if remaining_time >= MAX_Remaining_Time:
+        if probability > round(a1.corr(b1)):
+            continue
+        else:
+            Flag = 1
+            MAX_Remaining_Time = remaining_time
+            satellite_four_parameters = line2
+    else:
+        continue
+
+if Flag == 0:
+    satellite_four_parameters = Min_str
+
+print("卫星编号和相关参数     " + satellite_four_parameters)
+fp_last.writelines("卫星编号和相关参数     " + satellite_four_parameters)
+fp1.close()
+fp_last.close()
